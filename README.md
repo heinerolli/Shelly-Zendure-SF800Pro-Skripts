@@ -7,7 +7,7 @@ https://github.com/Zendure/zenSDK
 
 My initial scripts are using a Shelly Plus Plug S to measure Power.
 Changing this to i.e. using a Shelly Pro 3EM and similar devices is easy using the Shelly script library:
-https://www.shelly.com/de/blogs/scripts-library
+[https://www.shelly.com/de/blogs/scripts-library](https://shelly-api-docs.shelly.cloud/gen2/Scripts/Tutorial)
 
 To use them, just use the Shelly App, go to the device you want to run them on (i.e. Shelly plus plugS) and go to the Scripts Tab and add the script. You can start/stop it from there. (or let it start automatically when the Plus powers on).
 One note and odd thing: To see debug responses (i.e. print instructions), you need to enable "Websocket debug", which is not enabled by default. And strangely, you can not enable  that through the Shelly App (at least at the time of writing this), but you need to go to the devices lokal Web page here: http://IP_Address_of_Shelly_Plug/#/settings/debug
