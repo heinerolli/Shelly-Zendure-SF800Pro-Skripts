@@ -10,7 +10,7 @@ Changing this to i.e. using a Shelly Pro 3EM and similar devices is easy using t
 [https://www.shelly.com/de/blogs/scripts-library](https://shelly-api-docs.shelly.cloud/gen2/Scripts/Tutorial)
 Also, I put into the comments of the script the changes needed for 2 other devices.
 
-Also, the script Zen_Script_BattHealth.txt grabs the information from the SF800pro in to iterations (with a puse inbetween). This is done to manuver around a limited buffer size for print commands on the Shellydevice.
+Also, the script Zen_Script_BattHealth.txt grabs the information from the SF800pro in to iterations (with a pause inbetween). This is done to manuver around a limited buffer size for print commands on the Shelly device.
 
 To use the scripts, just use the Shelly App, go to the device you want to run them on (i.e. Shelly plus plug S) and go to the Scripts Tab and add the script. You can start/stop it from there. (Or let it start automatically when the Plus powers on).
 One note and odd thing: To see debug responses (i.e. print instructions), you need to enable "Websocket debug", which is not enabled by default. And strangely, you can not enable  that through the Shelly App (at least at the time of writing this), but you need to go to the devices lokal Web page here: http://IP_Address_of_Shelly_Plug/#/settings/debug
