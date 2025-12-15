@@ -52,13 +52,13 @@ function timerCode() {
       }
 
       // -------------------------------------------------------
-      // 2) Shelly-Leistung auslesen (ASYNC!)
+      // 2) Shelly-PLUG Leistung auslesen (ASYNC!)
       // -------------------------------------------------------
       Shelly.call(
-        "Switch.GetStatus",
+        "Switch.GetStatus",  
         { id: 0 },
 
-        function (s) {
+        function (s) {		 
 
           if (!s || typeof s.apower === "undefined") {
             if (verbose >= 1) print("Shelly Power nicht verfügbar!");
@@ -69,6 +69,26 @@ function timerCode() {
 
           if (verbose >= 2)
             print("Shelly_Power:    ", shellyPower, "W");
+
+
+      // -------------------------------------------------------
+      // 2) Shelly-Plus PM Mini Gen 3 Leistung auslesen 
+      // -------------------------------------------------------
+      //Shelly.call(
+      //  "PM1.GetStatus",
+      //  { id: 0 },
+
+      //  function (p) {
+
+      //    if (!p || typeof p.apower === "undefined") {
+      //      if (verbose >= 1) print("PM Mini Power nicht verfügbar!");
+      //      return;
+      //    }
+
+      //    var shellyPower = p.apower;
+
+      //    if (verbose >= 2)
+      //      print("Shelly_Power:    ", shellyPower, "W");
 
 
           // ---------------------------------------------------
@@ -143,6 +163,6 @@ function timerCode() {
 
 
 // -------------------------------------------------------------
-// Timer (empfohlen ≥ 15s wegen SolarFlow Latenz)
+// Timer 
 // -------------------------------------------------------------
 Timer.set(5000, true, timerCode);
