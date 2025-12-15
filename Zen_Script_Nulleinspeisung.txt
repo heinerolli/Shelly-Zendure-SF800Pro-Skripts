@@ -1,0 +1,148 @@
+// -------------------------------------------------------------
+// SolarFlow 800 Pro Dynamic Power Control via Shelly Plus Plug S
+// -------------------------------------------------------------
+// Logik: SolarFlow = exakt die aktuelle Leistung am Shelly
+// Keine Drift, saubere Begrenzung, Hysterese & Akkuschutz
+// -------------------------------------------------------------
+
+function timerCode() {
+
+  // -----------------------------------------------------------
+  // EINSTELLUNGEN
+  // -----------------------------------------------------------
+  var verbose    = 3;          // 0=quiet, 1=warn, 2=info, 3=debug
+  var akku_min   = 15;         // Untere Entladegrenze (%)
+  var akku_hyst  = 20;         // Hysterese (%)
+  var akku_max   = 95;         // aktuell nicht genutzt
+  var sf_ip      = "172.16.1.115";  // SolarFlow IP
+
+
+  // -----------------------------------------------------------
+  // 1) SolarFlow-Status abrufen
+  // -----------------------------------------------------------
+  Shelly.call(
+    "HTTP.GET",
+    { url: "http://" + sf_ip + "/properties/report" },
+
+    function (result) {
+
+      if (!result || !result.body) {
+        if (verbose >= 1) print("Kein SolarFlow-Status erhalten.");
+        return;
+      }
+
+      var zendu;
+      try {
+        zendu = JSON.parse(result.body);
+      } catch (e) {
+        if (verbose >= 1) print("SolarFlow JSON Parse Fehler.");
+        return;
+      }
+
+      if (!zendu.properties) {
+        if (verbose >= 1) print("SolarFlow Properties fehlen.");
+        return;
+      }
+
+      if (verbose >= 3) {
+        print("--- SolarFlow Status ---");
+        print("Seriennummer:    ", zendu.sn);
+        print("Ladestand:       ", zendu.properties.electricLevel, "%");
+        print("OutputLimit alt: ", zendu.properties.outputLimit, "W");
+      }
+
+      // -------------------------------------------------------
+      // 2) Shelly-Leistung auslesen (ASYNC!)
+      // -------------------------------------------------------
+      Shelly.call(
+        "Switch.GetStatus",
+        { id: 0 },
+
+        function (s) {
+
+          if (!s || typeof s.apower === "undefined") {
+            if (verbose >= 1) print("Shelly Power nicht verfügbar!");
+            return;
+          }
+
+          var shellyPower = s.apower;
+
+          if (verbose >= 2)
+            print("Shelly_Power:    ", shellyPower, "W");
+
+
+          // ---------------------------------------------------
+          // 3) Neues SolarFlow-Ausgangslimit berechnen
+          // ---------------------------------------------------
+          var newLimit = shellyPower;
+
+          if (newLimit < 0)   newLimit = 0;
+          if (newLimit > 800) newLimit = 800;
+
+          // Akkuschutz
+          if (zendu.properties.electricLevel <= 10)
+            newLimit = 0;
+
+          if (verbose >= 2)
+            print("outputLimit neu: ", newLimit, "W");
+
+
+          // ---------------------------------------------------
+          // 4) Payload + Hysterese
+          // ---------------------------------------------------
+          var payload = {
+            sn: zendu.sn,
+            properties: {
+              outputLimit: newLimit
+            }
+          };
+
+          // Hysterese: Aufladung erzwingen
+          if (zendu.properties.electricLevel <= akku_min &&
+              zendu.properties.minSoc / 10 === akku_min) {
+
+            payload.properties.minSoc = akku_hyst * 10;
+            if (verbose >= 2)
+              print("HYSTERESE → Aufladung aktiv:", akku_hyst, "%");
+          }
+
+          // Hysterese: Entladung wieder erlauben
+          if (zendu.properties.electricLevel > akku_hyst &&
+              zendu.properties.minSoc / 10 === akku_hyst) {
+
+            payload.properties.minSoc = akku_min * 10;
+            if (verbose >= 2)
+              print("HYSTERESE → Entladung aktiv:", akku_min, "%");
+          }
+
+
+          // ---------------------------------------------------
+          // 5) POST an SolarFlow
+          // ---------------------------------------------------
+          var body = JSON.stringify(payload);
+
+          if (verbose >= 3)
+            print("POST Payload:", body);
+
+          Shelly.call(
+            "HTTP.POST",
+            {
+              url: "http://" + sf_ip + "/properties/write",
+              body: body
+            },
+            function (res) {
+              if (verbose >= 3 && res && res.body)
+                print("SolarFlow Antwort:", res.body);
+            }
+          );
+        }
+      );
+    }
+  );
+}
+
+
+// -------------------------------------------------------------
+// Timer (empfohlen ≥ 15s wegen SolarFlow Latenz)
+// -------------------------------------------------------------
+Timer.set(5000, true, timerCode);

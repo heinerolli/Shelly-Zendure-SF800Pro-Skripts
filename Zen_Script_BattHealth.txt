@@ -1,0 +1,60 @@
+var sf_ip = "172.16.1.115";
+var LOOP_MS = 10000; // 10s
+var verbose = 2;
+
+var batchStep = 0; // Schritt innerhalb der Batch-Ausgabe
+
+function loop() {
+  Shelly.call(
+    "HTTP.GET",
+    { url: "http://" + sf_ip + "/properties/report" },
+    function(res) {
+      if (!res || !res.body) {
+        print("Keine Antwort vom SolarFlow");
+        return;
+      }
+
+      var z = JSON.parse(res.body);
+      if (!z || !z.properties) {
+        print("Fehler beim Parsen JSON");
+        return;
+      }
+
+      var props = z.properties;
+      var packs = z.packData || [];
+      
+      // -------------------------
+      // Batch-Ausgabe
+      // -------------------------
+      if (batchStep === 0) {
+        print("=== GLOBAL BATTERY STATUS ===");
+        print("SN: " + z.sn);
+        print("System SOC: " + props.electricLevel + "%");
+        print("BatVolt: " + (props.BatVolt/100).toFixed(2) + " V");
+        print("Pack Input Power: " + props.packInputPower + " W");
+        print("Output Home Power: " + props.outputHomePower + " W");
+        batchStep = 1; // nächster Schritt
+      } 
+      else {
+        var idx = batchStep - 1; // Pack Index
+        if (idx < packs.length) {
+          var p = packs[idx];
+          print("=== PACK #" + idx + " ===");
+          print("SOC Pack: " + p.socLevel + "%");
+          print("Gesamtspannung: " + (p.totalVol/100).toFixed(2) + " V");
+          print("Min Zellspannung: " + (p.minVol/100).toFixed(2) + " V");
+          print("Max Zellspannung: " + (p.maxVol/100).toFixed(2) + " V");
+          print("Strom: " + (p.batcur/10).toFixed(1) + " A");
+          print("Leistung: " + p.power + " W");
+          print("Max Temp: " + ((p.maxTemp-2731)/10).toFixed(1) + " °C");
+          batchStep++; // nächster Pack
+        } else {
+          batchStep = 0; // zurück zum Global-Block
+        }
+      }
+    }
+  );
+}
+
+// Timer starten
+Timer.set(LOOP_MS, true, loop);

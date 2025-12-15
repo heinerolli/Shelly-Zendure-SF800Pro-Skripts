@@ -1,0 +1,60 @@
+// =============================================================
+// RESET Script – SolarFlow Ziel-Ladewert zurücksetzen
+// =============================================================
+
+var sf_ip = "172.16.1.115";   // SolarFlow IP
+var verbose = 2;                // 0=quiet, 1=warn, 2=info, 3=debug
+var DEFAULT_SOC = 95;           // Ziel-Ladewert für Reset (%)
+
+// -------------------------------------------------------------
+// 1) SolarFlow Status abfragen
+// -------------------------------------------------------------
+Shelly.call("HTTP.GET", { url: "http://" + sf_ip + "/properties/report" }, function(res) {
+  
+  if (!res || !res.body) {
+    if (verbose >= 1) print("Kein SolarFlow-Status erhalten.");
+    return;
+  }
+
+  var z = JSON.parse(res.body);
+  if (!z || !z.properties) {
+    if (verbose >= 1) print("SolarFlow JSON Fehler.");
+    return;
+  }
+
+  if (verbose >= 2) {
+    print("--- SolarFlow Status ---");
+    print("Seriennummer:   ", z.sn);
+    print("Aktueller SOC:  ", z.properties.electricLevel, "%");
+    print("Aktuelle Spannung:  ", z.properties.BatVolt / 100, "V");
+    print("OutputLimit:    ", z.properties.outputLimit, "W");
+    print("Ziel-Ladewert:  ", z.properties.socSet/10, "%");
+  }
+
+  // -------------------------------------------------------------
+  // 2) Payload für Reset erstellen
+  // Output auf 0 W setzen
+  // socSet auf Default-Ziel
+  // -------------------------------------------------------------
+  var payload = {
+    sn: z.sn,
+    properties: {
+      outputLimit: 0,
+      socSet: DEFAULT_SOC * 10
+    }
+  };
+
+  if (verbose >= 2) print("Reset Payload:", JSON.stringify(payload));
+
+  // -------------------------------------------------------------
+  // 3) POST an SolarFlow senden
+  // -------------------------------------------------------------
+  Shelly.call("HTTP.POST", { 
+    url: "http://" + sf_ip + "/properties/write", 
+    body: JSON.stringify(payload) 
+  }, function(r) {
+    if (verbose >= 2) print("SF Reset Response:", r.body);
+    print("SolarFlow Output=0 W, Ziel-Ladewert auf", DEFAULT_SOC, "% zurückgesetzt");
+  });
+
+});

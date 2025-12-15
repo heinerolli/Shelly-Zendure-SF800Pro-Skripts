@@ -1,0 +1,60 @@
+// ------------------------------------------------------
+// SolarFlow 800 Pro
+// Output AUS + Akku auf 60 % laden (PV + Netz)
+// ------------------------------------------------------
+
+var sf_ip = "172.16.1.115";   // deine SolarFlow IP
+var verbose = 2;                // 0=quiet, 1=warn, 2=info, 3=debug
+var target_soc = 60;            // Ziel-Ladestand %
+
+Shelly.call(
+  "HTTP.GET",
+  { url: "http://" + sf_ip + "/properties/report" },
+
+  function (res) {
+
+    if (!res || !res.body) {
+      print("Kein SolarFlow Status");
+      return;
+    }
+
+    var z = JSON.parse(res.body);
+	if (!z || !z.properties) {
+    if (verbose >= 1) print("SolarFlow JSON Fehler.");
+    return;
+  }
+
+  if (verbose >= 2) {
+    print("--- SolarFlow Status ---");
+    print("Seriennummer:   ", z.sn);
+    print("Aktueller SOC:  ", z.properties.electricLevel, "%");
+    print("Aktuelle Spannung:  ", z.properties.BatVolt / 100, "V");
+    print("OutputLimit:    ", z.properties.outputLimit, "W");
+    print("Ziel-Ladewert:  ", z.properties.socSet/10, "%");
+  }
+
+    var payload = {
+      sn: z.sn,
+      properties: {
+        outputLimit: 0,                 // keine Einspeisung
+        socSet: target_soc * 10,        // Ladeziel (0.1%)
+        inputLimit: 800                 // max Ladeleistung (optional)
+      }
+    };
+
+    Shelly.call(
+      "HTTP.POST",
+      {
+        url: "http://" + sf_ip + "/properties/write",
+        body: JSON.stringify(payload)
+      },
+      function () {
+        print(
+          "SolarFlow lädt Akku auf",
+          target_soc,
+          "% (PV + Netz)"
+        );
+      }
+    );
+  }
+);
