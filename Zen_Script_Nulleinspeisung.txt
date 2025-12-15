@@ -52,7 +52,7 @@ function timerCode() {
       }
 
       // -------------------------------------------------------
-      // 2) Shelly-PLUG Leistung auslesen (ASYNC!)
+      // 2)a) Mit Shelly Plus PLUG S Leistung auslesen (ASYNC!)
       // -------------------------------------------------------
       Shelly.call(
         "Switch.GetStatus",  
@@ -72,7 +72,7 @@ function timerCode() {
 
 
       // -------------------------------------------------------
-      // 2) Shelly-Plus PM Mini Gen 3 Leistung auslesen 
+      // 2)b) Mit Shelly Plus PM Mini Gen 3 Leistung auslesen 
       // -------------------------------------------------------
       //Shelly.call(
       //  "PM1.GetStatus",
@@ -89,6 +89,27 @@ function timerCode() {
 
       //    if (verbose >= 2)
       //      print("Shelly_Power:    ", shellyPower, "W");
+
+
+      // -------------------------------------------------------
+      // 2)c) Mit Shelly Pro 3EM Gen 3 Leistung auslesen 
+      // -------------------------------------------------------
+
+	  //Shelly.call(
+	  //  "EM.GetStatus",
+	  //  { id: 0 },
+		
+	  //  function (em) {
+
+	  //	if (!em || typeof em.total_act_power === "undefined") {
+      //	  if (verbose >= 1) print("3EM Power nicht verfügbar!");
+	  //	  return;
+	  //	}
+
+	  //	var shellyPower = em.total_act_power;
+
+      //	if (verbose >= 2)
+      //	  print("Shelly_Power: ", shellyPower, "W");
 
 
           // ---------------------------------------------------
