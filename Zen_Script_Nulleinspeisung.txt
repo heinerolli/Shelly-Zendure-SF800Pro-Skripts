@@ -95,18 +95,21 @@ function timerCode() {
       // 2)c) Mit Shelly Pro 3EM Gen 3 Leistung auslesen 
       // -------------------------------------------------------
 
-	  //Shelly.call(
-	  //  "EM.GetStatus",
-	  //  { id: 0 },
+      //Shelly.call(
+      //  "EM.GetStatus",
+      //  { id: 0 },
 		
-	  //  function (em) {
+      //  function (em) {
 
-	  //	if (!em || typeof em.total_act_power === "undefined") {
+      //	if (!em || typeof em.total_act_power === "undefined") {
       //	  if (verbose >= 1) print("3EM Power nicht verfügbar!");
-	  //	  return;
-	  //	}
+      //	  return;
+      //	}
 
-	  //	var shellyPower = em.total_act_power;
+      //	var shellyPower = shellyPower + em.total_act_power; 
+      //        is the above correct?? Possibly add k factor (0.3 to 0.7) or better add (adaptive) Rate-Limit (50–150 W) per Iteration 
+      //	The above is a feedback loop. We can add a feed*forward* loop (from Boiler ESP) as well to cut delays
+      //	Make rate Limit even smaller, but allow big steps when known loads are switched on or off (Boiler 20%, 40%, ...)
 
       //	if (verbose >= 2)
       //	  print("Shelly_Power: ", shellyPower, "W");
