@@ -9,10 +9,14 @@ My script for Zero Grid Feed (Zen_Script_Nulleinspeisung.txt) is using a Shelly 
 Changing this to i.e. using a Shelly Pro 3EM and similar devices is easy using the Shelly script library:
 [https://www.shelly.com/de/blogs/scripts-library](https://shelly-api-docs.shelly.cloud/gen2/Scripts/Tutorial)
 Also, I put into the comments of the script the changes needed for 2 other devices.
+
 !Important! 
+
 It is important where in your setup the measurement device (the Shelly) is in relation to your gridmeter and the SF800:
 With a smartplug the setup is usually: Gridmeter - SF800 - Shelly Smartplug - Home Appliances. 
 In this setup, the smartplug measures only Home Appliances consumption and does not measure anything related to the SF800. For this scenario the Zen_Script_Nulleinspeisung.txt works.
+
+
 However, when you are measuring via a Shelly (pro) 3em, the setup is different. It is usually: Gridmeter - Shelly pro 3em - SF800 & Home Appliances. In this setup, the Shelly measures the HA consumption PLUS everything related to the SF800! That needs to be taken into account in your control loop and is not refelected yet in Zen_Script_Nulleinspeisung.txt. I will add that in a seperate script later (when I start using a pro 3em)
 
 
