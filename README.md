@@ -9,8 +9,14 @@ My script for Zero Grid Feed (Zen_Script_Nulleinspeisung.txt) is using a Shelly 
 Changing this to i.e. using a Shelly Pro 3EM and similar devices is easy using the Shelly script library:
 [https://www.shelly.com/de/blogs/scripts-library](https://shelly-api-docs.shelly.cloud/gen2/Scripts/Tutorial)
 Also, I put into the comments of the script the changes needed for 2 other devices.
+!Important! 
+It is important where in your setup the measurement device (the Shelly) is in relation to your gridmeter and the SF800:
+With a smartplug the setup is usually: Gridmeter - SF800 - Shelly Smartplug - Home Appliances. 
+In this setup, the smartplug measures only Home Appliances consumption and does not measure anything related to the SF800. For this scenario the Zen_Script_Nulleinspeisung.txt works.
+However, when you are measuring via a Shelly (pro) 3em, the setup is different. It is usually: Gridmeter - Shelly pro 3em - SF800 & Home Appliances. In this setup, the Shelly measures the HA consumption PLUS everything related to the SF800! That needs to be taken into account in your control loop and is not refelected yet in Zen_Script_Nulleinspeisung.txt. I will add that in a seperate script later (when I start using a pro 3em)
 
-Also, the script Zen_Script_BattHealth.txt grabs the information from the SF800pro in to iterations (with a pause inbetween). This is done to manuver around a limited buffer size for print commands on the Shelly device.
+
+Also to note: The script Zen_Script_BattHealth.txt grabs the information from the SF800pro in 'batches' (with a pause in between). This is done to manuver around a limited buffer size for print commands on the Shelly device.
 
 To use the scripts, just use the Shelly App, go to the device you want to run them on (i.e. Shelly plus plug S) and go to the Scripts Tab and add the script. You can start/stop it from there. (Or let it start automatically when the Plus powers on).
 One note and odd thing: To see debug responses (i.e. print instructions), you need to enable "Websocket debug", which is not enabled by default. And strangely, you can not enable  that through the Shelly App (at least at the time of writing this), but you need to go to the devices lokal Web page here: http://IP_Address_of_Shelly_Plug/#/settings/debug
